@@ -21,6 +21,12 @@
 				"adapter": "kotlin"
 			}
 		],
+		"client": [
+			{
+				"value": "hu.kszi2.sphunter.SPHunterClient",
+				"adapter": "kotlin"
+			}
+		],
 		"fabric-datagen": [
 			{
 				"value": "hu.kszi2.sphunter.SPHunterDataGenerator",
