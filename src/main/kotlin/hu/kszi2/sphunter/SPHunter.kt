@@ -21,6 +21,13 @@ object SPHunter : ModInitializer {
 
     private lateinit var currentServerSession: ClientPlayNetworkHandler
 
+    override fun onInitialize() {
+        logger.info("SPHunter is running!")
+
+        //Registering the HUNT command
+        commandExecute()
+    }
+
     private fun loadCurrentServerSession() {
         currentServerSession = MinecraftClient.getInstance().networkHandler!!
     }
@@ -36,31 +43,35 @@ object SPHunter : ModInitializer {
                         //Getting the actual server session
                         loadCurrentServerSession()
 
-                        //Greeting the player and counting down
-                        context.localMessage("Hunting will begin shortly!")
+                        //Greeting the player and counting down and begin hunting
                         GlobalScope.launch {
-                            Thread.sleep(1000)
-                            context.localMessage("3..")
-                            Thread.sleep(1000)
-                            context.localMessage("2.")
-                            Thread.sleep(1000)
-                            context.localMessage("1!")
-                            Thread.sleep(1000)
+                            context.apply {
+                                countDown()
+                                hunt()
+                            }
                         }
 
                         1//We need to return one according to the documentation
                     })
         })
     }
-
-    override fun onInitialize() {
-        logger.info("SPHunter is running!")
-
-        //Registering the HUNT command
-        commandExecute()
-    }
 }
 
-fun CommandContext<FabricClientCommandSource>.localMessage(text: String) {
+private fun CommandContext<FabricClientCommandSource>.hunt() {
+    TODO("Not yet implemented!")
+}
+
+private fun CommandContext<FabricClientCommandSource>.localMessage(text: String) {
     this.source.sendFeedback(Text.literal(text))
+}
+
+private fun CommandContext<FabricClientCommandSource>.countDown() {
+    this.localMessage("Hunting will begin shortly!")
+    Thread.sleep(1000)
+    this.localMessage("3..")
+    Thread.sleep(1000)
+    this.localMessage("2.")
+    Thread.sleep(1000)
+    this.localMessage("1!")
+    Thread.sleep(1000)
 }
