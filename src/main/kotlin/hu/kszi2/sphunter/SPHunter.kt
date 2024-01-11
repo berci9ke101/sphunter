@@ -2,6 +2,7 @@ package hu.kszi2.sphunter
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
+import hu.kszi2.sphunter.exception.ServerNotFoundException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.fabricmc.api.ModInitializer
@@ -29,11 +30,27 @@ object SPHunter : ModInitializer {
     }
 
     private fun loadCurrentServerSession() {
-        currentServerSession = MinecraftClient.getInstance().networkHandler!!
+        try {
+            currentServerSession = MinecraftClient.getInstance().networkHandler!!
+            //checking whether the client is connected to the wynncraft net work
+        } catch (_: Exception) {
+            throw ServerNotFoundException("Could not find server!")
+        }
+        try {
+            if (!currentServerSession.serverInfo?.address!!.contains("wynncraft")) {
+                throw ServerNotFoundException()
+            }
+        } catch (_: Exception) {
+            throw ServerNotFoundException("You are not connected to the wynncraft network!")
+        }
     }
 
     private fun sendChatCommand(command: String) {
-        currentServerSession.sendChatCommand(command)
+        try {
+            currentServerSession.sendChatCommand(command)
+        } catch (_: Exception) {
+            throw ServerNotFoundException("You are not connected to any server!")
+        }
     }
 
     private fun commandExecute() {
