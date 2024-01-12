@@ -1,8 +1,10 @@
 package hu.kszi2.sphunter
 
+import com.mojang.authlib.GameProfile
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import hu.kszi2.sphunter.exception.ServerNotFoundException
+import hu.kszi2.sphunter.exception.WorldNotFoundException
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -10,11 +12,14 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.command.CommandRegistryAccess
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
+import net.minecraft.util.ActionResult
 import net.minecraft.util.Formatting
 import org.slf4j.LoggerFactory
 
@@ -30,6 +35,15 @@ object SPHunter : ModInitializer {
 
         //Registering the HUNT command
         registerCommand()
+
+        //Greeting player
+        //FIXME: nem tudom mi van XD
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
+            val player: ServerPlayerEntity = handler.getPlayer()
+            player.sendMessage(
+                Text.literal("\nHi!\n").formatted(Formatting.BLUE)
+            )
+        }
     }
 
     private fun loadCurrentServerSession() {
@@ -49,7 +63,7 @@ object SPHunter : ModInitializer {
         }
     }
 
-    private fun sendChatCommand(command: String) {
+    private fun executeCommand(command: String) {
         try {
             currentServerSession.sendChatCommand(command)
         } catch (_: Exception) {
@@ -62,7 +76,7 @@ object SPHunter : ModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandRegistrationCallback { dispatcher: CommandDispatcher<FabricClientCommandSource?>, registryAccess: CommandRegistryAccess? ->
             dispatcher.register(ClientCommandManager.literal("hunt")
                 .executes { context: CommandContext<FabricClientCommandSource> ->
-                    //Getting the actual server session
+                    //Loading server session
                     loadCurrentServerSession()
 
                     //Greeting the player and counting down and begin hunting
@@ -79,8 +93,20 @@ object SPHunter : ModInitializer {
     }
 }
 
+private fun getSecondsUntilSoulPoint(): Int {
+    return try {
+        (24000 - (MinecraftClient.getInstance().world!!.timeOfDay.toInt() % 24000)) / 20
+    } catch (_: Exception) {
+        throw WorldNotFoundException("Could not find wynncraft world!")
+    }
+}
+
 private fun CommandContext<FabricClientCommandSource>.hunt() {
-    TODO("Not yet implemented!")
+    //Get the current seconds in the world until the soulpoint
+    val scnds = getSecondsUntilSoulPoint()
+    this.localWarning(String.format("\nSeconds until next soulpoint is %02d:%02d", scnds / 60, scnds % 60))
+
+    //TODO: maga a logika
 }
 
 private fun CommandContext<FabricClientCommandSource>.localMessage(text: String) {
