@@ -12,6 +12,7 @@ import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
@@ -37,12 +38,13 @@ object SPHunter : ModInitializer {
         registerCommand()
 
         //Greeting player
-        //FIXME: nem tudom mi van XD
-        ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
-            val player: ServerPlayerEntity = handler.getPlayer()
-            player.sendMessage(
-                Text.literal("\nHi!\n").formatted(Formatting.BLUE)
-            )
+        ClientPlayConnectionEvents.JOIN.register { _, _, client ->
+            GlobalScope.launch {
+                Thread.sleep(6000)
+                client.inGameHud.chatHud.addMessage(
+                    Text.literal("\nThank you for using SPHunter!\n").formatted(Formatting.BLUE)
+                )
+            }
         }
     }
 
