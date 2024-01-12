@@ -3,6 +3,7 @@ package hu.kszi2.sphunter
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import hu.kszi2.sphunter.exception.ServerNotFoundException
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.fabricmc.api.ModInitializer
@@ -12,7 +13,9 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.command.CommandRegistryAccess
+import net.minecraft.text.MutableText
 import net.minecraft.text.Text
+import net.minecraft.util.Formatting
 import org.slf4j.LoggerFactory
 
 
@@ -26,17 +29,18 @@ object SPHunter : ModInitializer {
         logger.info("SPHunter is running!")
 
         //Registering the HUNT command
-        commandExecute()
+        registerCommand()
     }
 
     private fun loadCurrentServerSession() {
         try {
             currentServerSession = MinecraftClient.getInstance().networkHandler!!
-            //checking whether the client is connected to the wynncraft net work
+            //checking whether the client is connected to a server
         } catch (_: Exception) {
             throw ServerNotFoundException("Could not find server!")
         }
         try {
+            //checking whether the client is connected to the wynncraft network
             if (!currentServerSession.serverInfo?.address!!.contains("wynncraft")) {
                 throw ServerNotFoundException()
             }
@@ -53,23 +57,24 @@ object SPHunter : ModInitializer {
         }
     }
 
-    private fun commandExecute() {
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun registerCommand() {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandRegistrationCallback { dispatcher: CommandDispatcher<FabricClientCommandSource?>, registryAccess: CommandRegistryAccess? ->
             dispatcher.register(ClientCommandManager.literal("hunt")
-                    .executes { context: CommandContext<FabricClientCommandSource> ->
-                        //Getting the actual server session
-                        loadCurrentServerSession()
+                .executes { context: CommandContext<FabricClientCommandSource> ->
+                    //Getting the actual server session
+                    loadCurrentServerSession()
 
-                        //Greeting the player and counting down and begin hunting
-                        GlobalScope.launch {
-                            context.apply {
-                                countDown()
-                                hunt()
-                            }
+                    //Greeting the player and counting down and begin hunting
+                    GlobalScope.launch {
+                        context.apply {
+                            countDown()
+                            hunt()
                         }
+                    }
 
-                        1//We need to return one according to the documentation
-                    })
+                    1//We need to return one according to the documentation
+                })
         })
     }
 }
@@ -79,7 +84,15 @@ private fun CommandContext<FabricClientCommandSource>.hunt() {
 }
 
 private fun CommandContext<FabricClientCommandSource>.localMessage(text: String) {
-    this.source.sendFeedback(Text.literal(text))
+    this.source.sendFeedback(Text.literal(text).formatted(Formatting.GREEN))
+}
+
+private fun CommandContext<FabricClientCommandSource>.localMessage(text: MutableText) {
+    this.source.sendFeedback(text)
+}
+
+private fun CommandContext<FabricClientCommandSource>.localWarning(text: String) {
+    this.source.sendFeedback(Text.literal(text).formatted(Formatting.GOLD).formatted(Formatting.BOLD))
 }
 
 private fun CommandContext<FabricClientCommandSource>.countDown() {
