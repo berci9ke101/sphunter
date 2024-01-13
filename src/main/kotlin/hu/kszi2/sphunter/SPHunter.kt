@@ -1,6 +1,8 @@
 package hu.kszi2.sphunter
 
 import com.mojang.brigadier.CommandDispatcher
+import hu.kszi2.sphunter.commands.aliasesCommand
+import hu.kszi2.sphunter.commands.coreCommand
 import hu.kszi2.sphunter.commands.helpCommand
 import hu.kszi2.sphunter.commands.regentimeCommand
 import hu.kszi2.sphunter.textformat.TF
@@ -48,18 +50,13 @@ object SPHunter : ModInitializer {
     }
 
     private fun registerCommand() {
-        ClientCommandRegistrationCallback.EVENT.register(ClientCommandRegistrationCallback { dispatcher: CommandDispatcher<FabricClientCommandSource?>, _: CommandRegistryAccess? ->
+        ClientCommandRegistrationCallback.EVENT.register(ClientCommandRegistrationCallback { dispatcher, _ ->
             dispatcher.register(
                 ClientCommandManager.literal("sphunter")
-                    .executes { context ->
-                        context.source.sendFeedback(
-                            TF.TFComment("For help, use: ")
-                                .append(TF.TFCommand("/sphunter help"))
-                        )
-                        1
-                    }
+                    .coreCommand()
                     .helpCommand()
                     .regentimeCommand()
+                    .aliasesCommand()
             )
         })
     }
