@@ -1,33 +1,20 @@
 package hu.kszi2.sphunter.core
 
-import hu.kszi2.sphunter.exception.WorldNotFoundException
-import hu.kszi2.sphunter.textformat.TF
-import net.minecraft.client.MinecraftClient
+import hu.kszi2.sphunter.SPHunter
+import hu.kszi2.sphunter.networking.sendChatMessage
+import hu.kszi2.sphunter.textformat.TF.TFInfo
 
-
-internal fun getSecondsUntilSoulPoint(): Int {
-    return try {
-        (24000 - (MinecraftClient.getInstance().world!!.timeOfDay.toInt() % 24000)) / 20
-    } catch (_: Exception) {
-        throw WorldNotFoundException("Could not find wynncraft world!")
-    }
+internal fun registerWorld() {
+    SPHunter.queue.autoAdd()
 }
 
-internal fun countDown() {
-    val chatHud = MinecraftClient.getInstance().inGameHud.chatHud
-    chatHud.addMessage(TF.TFComment("Hunting will begin shortly!"))
+private fun countDown() {
+    sendChatMessage(TFInfo("Hunting will begin shortly!"))
     Thread.sleep(1000)
-    chatHud.addMessage(TF.TFComment("3.."))
+    sendChatMessage(TFInfo("3.."))
     Thread.sleep(1000)
-    chatHud.addMessage(TF.TFComment("2."))
+    sendChatMessage(TFInfo("2."))
     Thread.sleep(1000)
-    chatHud.addMessage(TF.TFComment("1!"))
+    sendChatMessage(TFInfo("1!"))
     Thread.sleep(1000)
-}
-
-internal fun hunt() {
-    //Get the current seconds in the world until the soul point
-    //val scnds = getSecondsUntilSoulPoint()
-
-    //TODO: maga a logika
 }

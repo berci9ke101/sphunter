@@ -6,14 +6,14 @@ import net.minecraft.util.Formatting
 
 object TF {
     fun TFCommand(text: String): MutableText {
-        return Text.literal(text).formatted(Formatting.BOLD).formatted(Formatting.GREEN)
+        return Text.literal(text).formatted(Formatting.GREEN)
     }
 
     fun TFComment(text: String): MutableText {
-        return Text.literal(text).formatted(Formatting.AQUA)
+        return Text.literal(text).formatted(Formatting.BLUE)
     }
 
-    fun TFWarning(text: String): MutableText {
-        return Text.literal(text).formatted(Formatting.GOLD).formatted(Formatting.BOLD)
+    fun TFInfo(text: String): MutableText {
+        return Text.literal(text).formatted(Formatting.GOLD)
     }
 }

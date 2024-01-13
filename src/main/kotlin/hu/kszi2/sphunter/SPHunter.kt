@@ -1,51 +1,70 @@
 package hu.kszi2.sphunter
 
-import com.mojang.brigadier.CommandDispatcher
-import hu.kszi2.sphunter.commands.aliasesCommand
-import hu.kszi2.sphunter.commands.coreCommand
-import hu.kszi2.sphunter.commands.helpCommand
-import hu.kszi2.sphunter.commands.regentimeCommand
-import hu.kszi2.sphunter.textformat.TF
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import hu.kszi2.sphunter.commands.*
+import hu.kszi2.sphunter.core.WorldQueue
+import hu.kszi2.sphunter.core.registerWorld
+import hu.kszi2.sphunter.networking.sendChatMessage
+import hu.kszi2.sphunter.textformat.TF.TFComment
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
-import net.minecraft.client.network.ClientPlayNetworkHandler
-import net.minecraft.command.CommandRegistryAccess
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
 import org.slf4j.LoggerFactory
+import java.util.*
+import kotlin.concurrent.fixedRateTimer
+import kotlin.concurrent.thread
 
 
 object SPHunter : ModInitializer {
     private const val MOD_ID = "sphunter";
-    private val logger = LoggerFactory.getLogger(MOD_ID)
+    internal val logger = LoggerFactory.getLogger(MOD_ID)
 
-    internal lateinit var currentServerSession: ClientPlayNetworkHandler
+    private var greet = false
+    var hunting = false
+        private set
+    val queue = WorldQueue()
 
     override fun onInitialize() {
-        logger.info("SPHunter is running!")
+        logger.info("SPHunter: Initializing!")
 
         //Registering the HUNT command
         registerCommand()
 
         //Greeting player
         greetPlayer()
+
+        //Registering hunting
+        registerHunting()
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
+    fun toggleHunting() {
+        hunting = !hunting
+    }
+
     private fun greetPlayer() {
-        ClientPlayConnectionEvents.JOIN.register { _, _, client ->
-            GlobalScope.launch {
-                Thread.sleep(6000)
-                client.inGameHud.chatHud.addMessage(
-                    Text.literal("\nThank you for using SPHunter!\n").formatted(Formatting.BLUE)
-                )
+        ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+            if (!greet) {
+                thread {
+                    Thread.sleep(5000)
+                    sendChatMessage(
+                        TFComment("\nThank you for using SPHunter!\n")
+                    )
+                    greet = true
+                }
             }
+        }
+    }
+
+    private fun registerHunting() {
+        ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+            if (hunting) {
+                registerWorld()
+            }
+        }
+
+        fixedRateTimer("SPHunter-Ager", true, 0, 1000) {
+            queue.age()
+            queue.log()
         }
     }
 
@@ -57,6 +76,7 @@ object SPHunter : ModInitializer {
                     .helpCommand()
                     .regentimeCommand()
                     .aliasesCommand()
+                    .huntCommand()
             )
         })
     }

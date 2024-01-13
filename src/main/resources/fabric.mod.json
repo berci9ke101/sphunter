@@ -3,7 +3,7 @@
 	"id": "sphunter",
 	"version": "${version}",
 	"name": "SPHunter",
-	"description": "This mod gives questionable advantage.",
+	"description": "This mod aims to help the player with WynnCraft soul point management.",
 	"authors": [
 		"berci9ke101"
 	],
@@ -21,12 +21,6 @@
 				"adapter": "kotlin"
 			}
 		],
-		"client": [
-			{
-				"value": "hu.kszi2.sphunter.SPHunterClient",
-				"adapter": "kotlin"
-			}
-		],
 		"fabric-datagen": [
 			{
 				"value": "hu.kszi2.sphunter.SPHunterDataGenerator",
@@ -34,7 +28,9 @@
 			}
 		]
 	},
-	"mixins": [],
+	"mixins": [
+		"sphunter.mixins.json"
+	],
 	"depends": {
 		"fabricloader": ">=0.15.3",
 		"minecraft": "~1.20.2",
