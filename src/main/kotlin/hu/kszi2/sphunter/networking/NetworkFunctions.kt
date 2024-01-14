@@ -1,7 +1,7 @@
 package hu.kszi2.sphunter.networking
 
 import hu.kszi2.sphunter.SPHunter
-import hu.kszi2.sphunter.commands.getServers
+import hu.kszi2.sphunter.SPHunter.getServers
 import hu.kszi2.sphunter.core.WorldEntry
 import hu.kszi2.sphunter.exception.ServerNotFoundException
 import hu.kszi2.sphunter.exception.WorldNotFoundException

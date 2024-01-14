@@ -4,28 +4,22 @@ import hu.kszi2.sphunter.SPHunter.logger
 import hu.kszi2.sphunter.networking.getCurrentWorldPair
 import java.util.concurrent.CopyOnWriteArrayList
 
-class WorldQueue {
-    /**
-     * Key = WynnCraft server id
-     * Value = Seconds until next soul point
-     */
+class WorldQueue : Iterable<WorldEntry> {
     private val queue = CopyOnWriteArrayList<WorldEntry>()
+
+    fun size(): Int {
+        return queue.size
+    }
 
     fun log() {
         queue.forEach {
             logger.info(
-                "Soul Point status: [WC${it.worldNum}] - ${
-                    String.format(
-                        "%02d:%02d",
-                        it.spTime / 60,
-                        it.spTime % 60
-                    )
-                }"
+                "Soul Point status: [WC${it.worldNum}] - ${parseTime(it.spTime)}"
             )
         }
     }
 
-    fun autoAdd() {
+    fun addCurrentWorld() {
         val worldEntry = getCurrentWorldPair()
 
         if (worldEntry.worldNum == -1) {
@@ -49,8 +43,8 @@ class WorldQueue {
             }
         }
 
-        logger.info("Added world: ${worldEntry.worldNum}")
         queue.add(worldEntry)
+        logger.info("Added world: ${worldEntry.worldNum}")
         this.sortSelf()
     }
 
@@ -58,5 +52,9 @@ class WorldQueue {
         queue.sortWith { o1, o2 ->
             o1.spTime - o2.spTime
         }
+    }
+
+    override fun iterator(): Iterator<WorldEntry> {
+        return queue.iterator()
     }
 }

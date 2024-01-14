@@ -3,7 +3,8 @@ package hu.kszi2.sphunter.commands
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.SPHunter.hunting
-import hu.kszi2.sphunter.core.WorldQueue
+import hu.kszi2.sphunter.core.generateRouteOutput
+import hu.kszi2.sphunter.core.parseTime
 import hu.kszi2.sphunter.networking.checkWCNetwork
 import hu.kszi2.sphunter.networking.getCurrentWorld
 import hu.kszi2.sphunter.networking.getSecondsUntilSoulPoint
@@ -14,15 +15,15 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 
 //Command aliases
-private val helpAliases = listOf("help", "h")
+private val helpAliases = listOf("help")
 private val regentimeAliases = listOf("regentime", "rt")
 private val aliasAliases = listOf("aliases", "alias", "as")
 private val huntAliases = listOf("hunt", "h")
-
-internal var getServers = false
+private val generaterouteAliases = listOf("generateroute", "genroute", "genr", "gr")
 
 fun LiteralArgumentBuilder<FabricClientCommandSource?>.coreCommand(): LiteralArgumentBuilder<FabricClientCommandSource?> {
     return this.executes { context ->
+        //Checking whether the client is connected to the wynncraft network
         checkWCNetwork()
         context.source!!.sendFeedback(
             TFComment("For help, use: ")
@@ -37,6 +38,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
         this.then(
             ClientCommandManager.literal(s)
                 .executes { context ->
+                    //Checking whether the client is connected to the wynncraft network
                     checkWCNetwork()
                     context.source.sendFeedback(
                         TFComment(
@@ -55,7 +57,10 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
                             .append(TFComment(" - displays the amount of time left for the next soul point"))
 
                             .append(TFCommand("\n/sphunter hunt"))
-                            .append(TFComment(" - toggles the hunter mode"))
+                            .append(TFComment(" - toggles the hunter mode [on/off]"))
+
+                            .append(TFCommand("\n/sphunter generateroute"))
+                            .append(TFComment(" - generates an optimal route to take to regenerate soul points"))
 
                             .append(TFComment("\n----------------------"))
                     )
@@ -70,18 +75,13 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.regentimeCommand(): Liter
     regentimeAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                //Checking whether the client is connected to the wynncraft network
                 checkWCNetwork()
-                val scnds = getSecondsUntilSoulPoint()
+
+                val seconds = getSecondsUntilSoulPoint()
                 context.source.sendFeedback(
-                    TFComment("[WC${getCurrentWorld()}] ").append(
-                        TFInfo(
-                            String.format(
-                                "Time until next soul point is %02d:%02d",
-                                scnds / 60,
-                                scnds % 60
-                            )
-                        )
-                    )
+                    TFComment("[WC${getCurrentWorld()}] ")
+                        .append(TFInfo(parseTime(seconds)))
                 )
                 1
             }
@@ -94,7 +94,9 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
     aliasAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                //Checking whether the client is connected to the wynncraft network
                 checkWCNetwork()
+
                 context.source.sendFeedback(
                     TFComment(
                         "----------------------" +
@@ -112,6 +114,9 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
                         .append(TFCommand("\n/sphunter hunt"))
                         .append(TFComment(" - ${huntAliases.joinToString(separator = ", ")}"))
 
+                        .append(TFCommand("\n/sphunter generateroute"))
+                        .append(TFComment(" - ${huntAliases.joinToString(separator = ", ")}"))
+
                         .append(TFComment("\n----------------------"))
                 )
                 1
@@ -125,13 +130,13 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.huntCommand(): LiteralArg
     huntAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                //Checking whether the client is connected to the wynncraft network
                 checkWCNetwork()
-                val txt: String
-                if (!hunting) {
-                    txt = "Happy hunting!"
-                    SPHunter.queue = WorldQueue()
+
+                val txt: String = if (!hunting) {
+                    "Happy hunting!"
                 } else {
-                    txt = "Stopped Hunting!"
+                    "Stopped Hunting!"
                 }
 
                 context.source.sendFeedback(
@@ -140,6 +145,22 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.huntCommand(): LiteralArg
 
                 //toggles Hunting
                 SPHunter.toggleHunting()
+                1
+            }
+        )
+    }
+    return this
+}
+
+fun LiteralArgumentBuilder<FabricClientCommandSource?>.generaterouteCommand(): LiteralArgumentBuilder<FabricClientCommandSource?> {
+    generaterouteAliases.forEach { s ->
+        this.then(ClientCommandManager.literal(s)
+            .executes { context ->
+                //Checking whether the client is connected to the wynncraft network
+                checkWCNetwork()
+
+                context.source.sendFeedback(TFComment(generateRouteOutput()))
+
                 1
             }
         )

@@ -21,6 +21,9 @@ object SPHunter : ModInitializer {
     var hunting = false
         private set
     var queue = WorldQueue()
+        private set
+
+    internal var getServers = false
 
     override fun onInitialize() {
         logger.info("SPHunter: Starting beta build!")
@@ -36,7 +39,17 @@ object SPHunter : ModInitializer {
     }
 
     fun toggleHunting() {
-        hunting = !hunting
+        when (hunting) {
+            true -> hunting = false
+            false -> {
+                queue = WorldQueue()
+                hunting = true
+            }
+        }
+    }
+
+    internal fun offHunting() {
+        hunting = false
     }
 
     private fun greetPlayer() {
@@ -55,11 +68,14 @@ object SPHunter : ModInitializer {
 
     private fun registerHunting() {
         fixedRateTimer("SPHunter-SoulTicker", false, 0, 1000) {
-            queue.age()
-            queue.log()
+            queue.age() //Stepping one second
             if (hunting) {
-                queue.autoAdd()
+                queue.addCurrentWorld()
             }
+        }
+
+        fixedRateTimer("SPHunter-WorldManager", false, 0, 5000) {
+            queue.log()
         }
     }
 
@@ -72,6 +88,7 @@ object SPHunter : ModInitializer {
                     .regentimeCommand()
                     .aliasesCommand()
                     .huntCommand()
+                    .generaterouteCommand()
             )
         })
     }

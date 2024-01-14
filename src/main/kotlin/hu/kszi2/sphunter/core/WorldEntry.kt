@@ -14,7 +14,6 @@ class WorldEntry(val worldNum: Int = -1, var spTime: Int = -1) {
         if (other !is WorldEntry) {
             return false
         }
-
         return this.worldNum == other.worldNum
     }
 
