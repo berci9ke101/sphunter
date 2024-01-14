@@ -7,22 +7,23 @@ import hu.kszi2.sphunter.exception.WorldNotFoundException
 import hu.kszi2.sphunter.networking.executeCommand
 import net.minecraft.client.MinecraftClient
 import net.minecraft.text.Text
+import java.util.concurrent.CopyOnWriteArrayList
 
 class WorldQueue {
     /**
      * Key = WynnCraft server id
      * Value = Seconds until next soul point
      */
-    private val queue: MutableList<Pair<Int, Int>> = mutableListOf()
+    private val queue = CopyOnWriteArrayList<WorldEntry>()
 
     fun log() {
         queue.forEach {
             logger.info(
-                "Soul Point status: [WC${it.first}] - ${
+                "Soul Point status: [WC${it.worldNum}] - ${
                     String.format(
                         "%02d:%02d",
-                        it.second / 60,
-                        it.second % 60
+                        it.spTime / 60,
+                        it.spTime % 60
                     )
                 }"
             )
@@ -30,43 +31,34 @@ class WorldQueue {
     }
 
     fun autoAdd() {
-        synchronized(SPHunter) {
-            val pair = getCurrentWorldPair()
-            if (pair.first == -1) {
-                return
-            }
-            this.add(pair)
-            logger.info("Added world: ${pair.first}")
+        val worldEntry = getCurrentWorldPair()
+        if (worldEntry.worldNum == -1) {
+            return
         }
+        this.add(worldEntry)
+        logger.info("Added world: ${worldEntry.worldNum}")
     }
 
     fun age() {
-        synchronized(SPHunter) {
-            queue.forEach {
-                val new = it.copy(it.first, it.second - 1)
-
-                if (new.second <= 10) {
-                    return
-                }
-
-                queue.remove(it)
-                queue.add(new)
-            }
-            sortSelf()
+        queue.forEach {
+            it.age()
         }
     }
 
-    private fun add(worldEntry: Pair<Int, Int>) {
-        if (queue.contains(worldEntry)) {
-            return
+    private fun add(worldEntry: WorldEntry) {
+        queue.forEach {
+            if (it.worldNum == worldEntry.worldNum) {
+                return
+            }
         }
+
         queue.add(worldEntry)
         this.sortSelf()
     }
 
     private fun sortSelf() {
         queue.sortWith { o1, o2 ->
-            o1.second - o2.second
+            o1.spTime - o2.spTime
         }
     }
 }
@@ -91,9 +83,21 @@ internal fun getCurrentWorld(): Int {
     return -1
 }
 
-internal fun getCurrentWorldPair(): Pair<Int, Int> {
-    val currworldID = getCurrentWorld()
-    return Pair(currworldID, getSecondsUntilSoulPoint())
+internal fun getCurrentWorldPair(): WorldEntry {
+    var pair = WorldEntry()
+    //while (!onWorld()) {
+    pair = WorldEntry(getCurrentWorld(), getSecondsUntilSoulPoint())
+    //}
+    return pair
+}
+
+internal fun onWorld(): Boolean {
+    MinecraftClient.getInstance().networkHandler!!.playerList.forEach {
+        if (Regex("\\[WC(?<id>\\d+)]").containsMatchIn(it.displayName.toString())) {
+            return true
+        }
+    }
+    return false
 }
 
 internal fun parseServers(message: Text) {

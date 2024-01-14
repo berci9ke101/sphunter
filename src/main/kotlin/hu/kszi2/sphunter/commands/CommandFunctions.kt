@@ -3,8 +3,10 @@ package hu.kszi2.sphunter.commands
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.SPHunter.hunting
+import hu.kszi2.sphunter.core.WorldQueue
 import hu.kszi2.sphunter.core.getCurrentWorld
 import hu.kszi2.sphunter.core.getSecondsUntilSoulPoint
+import hu.kszi2.sphunter.core.registerWorld
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFCommand
 import hu.kszi2.sphunter.textformat.TF.TFComment
@@ -120,10 +122,13 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.huntCommand(): LiteralArg
     huntAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
-                val txt: String = if (!hunting) {
-                    "Happy hunting!"
+                val txt: String
+                if (!hunting) {
+                    txt = "Happy hunting!"
+                    SPHunter.queue = WorldQueue()
+                    registerWorld()
                 } else {
-                    "Stopped Hunting!"
+                    txt = "Stopped Hunting!"
                 }
 
                 context.source.sendFeedback(

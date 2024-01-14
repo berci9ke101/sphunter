@@ -5,6 +5,8 @@ import hu.kszi2.sphunter.core.WorldQueue
 import hu.kszi2.sphunter.core.registerWorld
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFComment
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
@@ -22,7 +24,7 @@ object SPHunter : ModInitializer {
     private var greet = false
     var hunting = false
         private set
-    val queue = WorldQueue()
+    var queue = WorldQueue()
 
     override fun onInitialize() {
         logger.info("SPHunter: Initializing!")
@@ -62,7 +64,7 @@ object SPHunter : ModInitializer {
             }
         }
 
-        fixedRateTimer("SPHunter-Ager", true, 0, 1000) {
+        fixedRateTimer("SPHunter-SoulTicker", false, 0, 1000) {
             queue.age()
             queue.log()
         }

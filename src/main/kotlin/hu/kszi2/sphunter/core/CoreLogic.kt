@@ -8,6 +8,7 @@ internal fun registerWorld() {
     SPHunter.queue.autoAdd()
 }
 
+//-------------For AutoHunt
 private fun countDown() {
     sendChatMessage(TFInfo("Hunting will begin shortly!"))
     Thread.sleep(1000)
