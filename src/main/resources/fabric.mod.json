@@ -3,13 +3,12 @@
 	"id": "sphunter",
 	"version": "${version}",
 	"name": "SPHunter",
-	"description": "This mod aims to help the player with WynnCraft soul point management.",
+	"description": "SPHunter aims to help the player with WynnCraft soul point management.",
 	"authors": [
 		"berci9ke101"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/berci9ke101/sphunter"
 	},
 	"license": "BSD 3-Clause License",
 	"icon": "assets/sphunter/icon.png",

@@ -1,12 +1,7 @@
 package hu.kszi2.sphunter.core
 
-import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFInfo
-
-internal fun registerWorld() {
-    SPHunter.queue.autoAdd()
-}
 
 //-------------For AutoHunt
 private fun countDown() {

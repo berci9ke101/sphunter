@@ -4,10 +4,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.SPHunter.hunting
 import hu.kszi2.sphunter.core.WorldQueue
-import hu.kszi2.sphunter.core.getCurrentWorld
-import hu.kszi2.sphunter.core.getSecondsUntilSoulPoint
-import hu.kszi2.sphunter.core.registerWorld
-import hu.kszi2.sphunter.networking.sendChatMessage
+import hu.kszi2.sphunter.networking.checkWCNetwork
+import hu.kszi2.sphunter.networking.getCurrentWorld
+import hu.kszi2.sphunter.networking.getSecondsUntilSoulPoint
 import hu.kszi2.sphunter.textformat.TF.TFCommand
 import hu.kszi2.sphunter.textformat.TF.TFComment
 import hu.kszi2.sphunter.textformat.TF.TFInfo
@@ -24,6 +23,7 @@ internal var getServers = false
 
 fun LiteralArgumentBuilder<FabricClientCommandSource?>.coreCommand(): LiteralArgumentBuilder<FabricClientCommandSource?> {
     return this.executes { context ->
+        checkWCNetwork()
         context.source!!.sendFeedback(
             TFComment("For help, use: ")
                 .append(TFCommand("/sphunter help"))
@@ -37,6 +37,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
         this.then(
             ClientCommandManager.literal(s)
                 .executes { context ->
+                    checkWCNetwork()
                     context.source.sendFeedback(
                         TFComment(
                             "----------------------" +
@@ -69,6 +70,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.regentimeCommand(): Liter
     regentimeAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                checkWCNetwork()
                 val scnds = getSecondsUntilSoulPoint()
                 context.source.sendFeedback(
                     TFComment("[WC${getCurrentWorld()}] ").append(
@@ -92,6 +94,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
     aliasAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                checkWCNetwork()
                 context.source.sendFeedback(
                     TFComment(
                         "----------------------" +
@@ -122,11 +125,11 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.huntCommand(): LiteralArg
     huntAliases.forEach { s ->
         this.then(ClientCommandManager.literal(s)
             .executes { context ->
+                checkWCNetwork()
                 val txt: String
                 if (!hunting) {
                     txt = "Happy hunting!"
                     SPHunter.queue = WorldQueue()
-                    registerWorld()
                 } else {
                     txt = "Stopped Hunting!"
                 }
