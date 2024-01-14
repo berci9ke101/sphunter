@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static hu.kszi2.sphunter.core.WorldQueueKt.parseServers;
+import static hu.kszi2.sphunter.networking.NetworkFunctionsKt.parseServers;
 
 //------------For auto-hunt
 @Mixin(ChatHud.class)

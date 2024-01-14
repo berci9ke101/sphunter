@@ -1,5 +1,7 @@
 package hu.kszi2.sphunter.textformat
 
+import hu.kszi2.sphunter.core.WorldEntry
+import hu.kszi2.sphunter.core.parseTime
 import net.minecraft.text.MutableText
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
@@ -15,5 +17,27 @@ object TF {
 
     fun TFInfo(text: String): MutableText {
         return Text.literal(text).formatted(Formatting.GOLD)
+    }
+
+    fun TFRoute(i: Int, worldInstance: WorldEntry): MutableText {
+        val numbering = TFInfo("${(i + 1).toString().padStart(2, '0')}. ")
+        val worldPrefix = TFComment("[")
+        val wc = Text.literal("WC").formatted(Formatting.GRAY)
+        val worldNum = Text.literal(
+            worldInstance.worldNum.toString().padStart(2, '0')
+        ).formatted(Formatting.WHITE)
+        val worldSuffix = TFComment("]")
+        val dash = Text.literal(" - ")
+        val trailing = TFComment("Time left: ")
+        val timeLeft = TFInfo(parseTime(worldInstance.spTime) + "\n")
+
+        return numbering
+            .append(worldPrefix)
+            .append(wc)
+            .append(worldNum)
+            .append(worldSuffix)
+            .append(dash)
+            .append(trailing)
+            .append(timeLeft)
     }
 }

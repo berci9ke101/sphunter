@@ -2,17 +2,13 @@ package hu.kszi2.sphunter
 
 import hu.kszi2.sphunter.commands.*
 import hu.kszi2.sphunter.core.WorldQueue
-import hu.kszi2.sphunter.core.registerWorld
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFComment
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import org.slf4j.LoggerFactory
-import java.util.*
 import kotlin.concurrent.fixedRateTimer
 import kotlin.concurrent.thread
 
@@ -25,9 +21,12 @@ object SPHunter : ModInitializer {
     var hunting = false
         private set
     var queue = WorldQueue()
+        private set
+
+    internal var getServers = false
 
     override fun onInitialize() {
-        logger.info("SPHunter: Initializing!")
+        logger.info("SPHunter: Starting beta build!")
 
         //Registering the HUNT command
         registerCommand()
@@ -40,7 +39,17 @@ object SPHunter : ModInitializer {
     }
 
     fun toggleHunting() {
-        hunting = !hunting
+        when (hunting) {
+            true -> hunting = false
+            false -> {
+                queue = WorldQueue()
+                hunting = true
+            }
+        }
+    }
+
+    internal fun offHunting() {
+        hunting = false
     }
 
     private fun greetPlayer() {
@@ -58,14 +67,14 @@ object SPHunter : ModInitializer {
     }
 
     private fun registerHunting() {
-        ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+        fixedRateTimer("SPHunter-SoulTicker", false, 0, 1000) {
+            queue.age() //Stepping one second
             if (hunting) {
-                registerWorld()
+                queue.addCurrentWorld()
             }
         }
 
-        fixedRateTimer("SPHunter-SoulTicker", false, 0, 1000) {
-            queue.age()
+        fixedRateTimer("SPHunter-WorldManager", false, 0, 5000) {
             queue.log()
         }
     }
@@ -79,6 +88,7 @@ object SPHunter : ModInitializer {
                     .regentimeCommand()
                     .aliasesCommand()
                     .huntCommand()
+                    .generaterouteCommand()
             )
         })
     }

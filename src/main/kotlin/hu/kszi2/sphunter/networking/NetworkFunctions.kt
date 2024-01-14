@@ -1,6 +1,10 @@
 package hu.kszi2.sphunter.networking
 
+import hu.kszi2.sphunter.SPHunter
+import hu.kszi2.sphunter.SPHunter.getServers
+import hu.kszi2.sphunter.core.WorldEntry
 import hu.kszi2.sphunter.exception.ServerNotFoundException
+import hu.kszi2.sphunter.exception.WorldNotFoundException
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayNetworkHandler
 import net.minecraft.text.Text
@@ -31,4 +35,60 @@ internal fun executeCommand(
 
 internal fun sendChatMessage(text: Text) {
     MinecraftClient.getInstance().inGameHud.chatHud.addMessage(text)
+}
+
+internal fun getSecondsUntilSoulPoint(): Int {
+    return try {
+        (24000 - (MinecraftClient.getInstance().world!!.timeOfDay.toInt() % 24000)) / 20
+    } catch (_: Exception) {
+        throw WorldNotFoundException("Could not find wynncraft world!")
+    }
+}
+
+internal fun getCurrentWorld(): Int {
+    val playerList = MinecraftClient.getInstance().networkHandler!!.playerList
+    val regex = Regex("\\[WC(?<id>\\d+)]")
+
+    playerList.forEach {
+        if (regex.containsMatchIn(it.displayName.toString())) {
+            return regex.find(it.displayName.toString())!!.groups["id"]!!.value.toInt()
+        }
+    }
+    return -1
+}
+
+internal fun getCurrentWorldPair(): WorldEntry {
+    var pair = WorldEntry()
+    if (onWorld()) {
+        pair = WorldEntry(getCurrentWorld(), getSecondsUntilSoulPoint())
+    }
+    return pair
+}
+
+internal fun onWorld(): Boolean {
+    MinecraftClient.getInstance().networkHandler!!.playerList.forEach {
+        if (Regex("\\[WC(?<id>\\d+)]").containsMatchIn(it.displayName.toString())) {
+            return true
+        }
+    }
+    return false
+}
+
+//-----------For auto-hunt
+internal fun parseServers(message: Text) {
+    if (getServers) {
+        val regex = Regex("WC(?<id>\\d+)")
+        if (regex.containsMatchIn(message.toString())) {
+            val results = regex.findAll(message.toString())
+            results.forEach {
+                SPHunter.logger.info("SPHunter found server: WC" + it.groups["id"]!!.value.toInt())
+            }
+        }
+    }
+}
+
+internal fun getAllWorlds() {
+    getServers = true
+    executeCommand("servers list")
+    getServers = false
 }
