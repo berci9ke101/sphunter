@@ -4,6 +4,10 @@ import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.exception.WorldNotFoundException
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFInfo
+import hu.kszi2.sphunter.textformat.TF.TFRoute
+import net.minecraft.text.MutableText
+import net.minecraft.text.Text
+import net.minecraft.util.Formatting
 
 fun parseTime(seconds: Int): String {
     return String.format(
@@ -14,23 +18,20 @@ fun parseTime(seconds: Int): String {
 }
 
 //FIXME: when player changes world-> chat clears...
-internal fun generateRouteOutput(): String {
+internal fun generateRouteOutput(): MutableText {
     if (SPHunter.queue.size() <= 0) {
-        throw WorldNotFoundException("No worlds are loaded yet. Try again later!.")
+        throw WorldNotFoundException("No worlds are loaded yet. Try again later!")
     }
 
     SPHunter.offHunting() //Turn off hunting
     val currentQueue = SPHunter.queue
 
-    var text = "--->The optimal route<---\n"
+    val text = Text.literal("     The optimal route:\n").formatted(Formatting.WHITE)
 
     currentQueue.forEachIndexed { i, world ->
-        text += "${(i + 1).toString().padStart(2, '0')}. " +
-                "[WC${
-                    world.worldNum.toString().padStart(2, '0')
-                }] - Time left: ${parseTime(world.spTime)}\n"
+        text.append(TFRoute(i, world))
     }
-    text += "-----------------------"
+    text.append(Text.literal("-----------------------").formatted(Formatting.WHITE))
     return text
 }
 

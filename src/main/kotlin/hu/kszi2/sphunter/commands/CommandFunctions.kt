@@ -42,7 +42,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
                     checkWCNetwork()
                     context.source.sendFeedback(
                         TFComment(
-                            "----------------------" +
+                            "-----------------------" +
                                     "\nSPHunter is a soul point tracker mod, which helps you to get soul points easier." +
                                     "\n" +
                                     "\nAvailable commands are:\n"
@@ -62,7 +62,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
                             .append(TFCommand("\n/sphunter generateroute"))
                             .append(TFComment(" - generates an optimal route to take to regenerate soul points"))
 
-                            .append(TFComment("\n----------------------"))
+                            .append(TFComment("\n-----------------------"))
                     )
                     1
                 }
@@ -99,7 +99,7 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
 
                 context.source.sendFeedback(
                     TFComment(
-                        "----------------------" +
+                        "-----------------------" +
                                 "\nAvailable aliases are:\n"
                     )
                         .append(TFCommand("\n/sphunter aliases"))
@@ -115,9 +115,9 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
                         .append(TFComment(" - ${huntAliases.joinToString(separator = ", ")}"))
 
                         .append(TFCommand("\n/sphunter generateroute"))
-                        .append(TFComment(" - ${huntAliases.joinToString(separator = ", ")}"))
+                        .append(TFComment(" - ${generaterouteAliases.joinToString(separator = ", ")}"))
 
-                        .append(TFComment("\n----------------------"))
+                        .append(TFComment("\n-----------------------"))
                 )
                 1
             }
@@ -159,8 +159,8 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.generaterouteCommand(): L
                 //Checking whether the client is connected to the wynncraft network
                 checkWCNetwork()
 
-                context.source.sendFeedback(TFComment(generateRouteOutput()))
-
+                //Sending back the optimal route
+                context.source.sendFeedback(generateRouteOutput())
                 1
             }
         )
