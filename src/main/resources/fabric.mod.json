@@ -4,13 +4,13 @@
   "version": "${version}",
   "name": "SPHunter",
   "description": "SPHunter aims to help the player with WynnCraft soul point management.",
-  "homepage": "https://modrinth.com/mod/sphunter",
-  "issues": "https://github.com/berci9ke101/sphunter/issues",
   "authors": [
     "berci9ke101"
   ],
   "contact": {
-    "sources": "https://github.com/berci9ke101/sphunter"
+    "sources": "https://github.com/berci9ke101/sphunter",
+    "homepage": "https://modrinth.com/mod/sphunter",
+    "issues": "https://github.com/berci9ke101/sphunter/issues"
   },
   "license": "BSD 3-Clause License",
   "icon": "assets/sphunter/icon.png",
