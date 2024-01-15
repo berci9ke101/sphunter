@@ -5,7 +5,6 @@ import hu.kszi2.sphunter.SPHunter
 import hu.kszi2.sphunter.SPHunter.hunting
 import hu.kszi2.sphunter.core.generateRouteOutput
 import hu.kszi2.sphunter.core.parseTime
-import hu.kszi2.sphunter.exception.CoreReloadException
 import hu.kszi2.sphunter.networking.checkWCNetwork
 import hu.kszi2.sphunter.networking.getCurrentWorld
 import hu.kszi2.sphunter.networking.getSecondsUntilSoulPoint

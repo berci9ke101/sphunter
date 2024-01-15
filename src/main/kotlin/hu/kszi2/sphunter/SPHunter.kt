@@ -15,7 +15,7 @@ import kotlin.concurrent.thread
 
 
 object SPHunter : ModInitializer {
-    private const val MOD_ID = "sphunter";
+    private const val MOD_ID = "sphunter"
     internal val logger = LoggerFactory.getLogger(MOD_ID)
 
     private var greet = false
