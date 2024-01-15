@@ -10,6 +10,7 @@ import hu.kszi2.sphunter.networking.getCurrentWorld
 import hu.kszi2.sphunter.networking.getSecondsUntilSoulPoint
 import hu.kszi2.sphunter.textformat.TF.TFCommand
 import hu.kszi2.sphunter.textformat.TF.TFComment
+import hu.kszi2.sphunter.textformat.TF.TFError
 import hu.kszi2.sphunter.textformat.TF.TFInfo
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
@@ -17,9 +18,10 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 //Command aliases
 private val helpAliases = listOf("help")
 private val regentimeAliases = listOf("regentime", "rt")
-private val aliasAliases = listOf("aliases", "alias", "as")
+private val aliasAliases = listOf("aliases", "alias", "a")
 private val huntAliases = listOf("hunt", "h")
-private val generaterouteAliases = listOf("generateroute", "genroute", "genr", "gr")
+private val generaterouteAliases = listOf("generateroute", "genroute", "gr")
+private val reloadAliases = listOf("reload", "r")
 
 fun LiteralArgumentBuilder<FabricClientCommandSource?>.coreCommand(): LiteralArgumentBuilder<FabricClientCommandSource?> {
     return this.executes { context ->
@@ -60,7 +62,10 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.helpCommand(): LiteralArg
                             .append(TFComment(" - toggles the hunter mode [on/off]"))
 
                             .append(TFCommand("\n/sphunter generateroute"))
-                            .append(TFComment(" - generates an optimal route to take to regenerate soul points"))
+                            .append(TFComment(" - generates an optimal route to take to regenerate soul points [disables hunter mode]"))
+
+                            .append(TFCommand("\n/sphunter reload"))
+                            .append(TFComment(" - reloads the mod core [all hunter data will be lost]"))
 
                             .append(TFComment("\n-----------------------"))
                     )
@@ -117,6 +122,9 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.aliasesCommand(): Literal
                         .append(TFCommand("\n/sphunter generateroute"))
                         .append(TFComment(" - ${generaterouteAliases.joinToString(separator = ", ")}"))
 
+                        .append(TFCommand("\n/sphunter reload"))
+                        .append(TFComment(" - ${reloadAliases.joinToString(separator = ", ")}"))
+
                         .append(TFComment("\n-----------------------"))
                 )
                 1
@@ -161,6 +169,23 @@ fun LiteralArgumentBuilder<FabricClientCommandSource?>.generaterouteCommand(): L
 
                 //Sending back the optimal route
                 context.source.sendFeedback(generateRouteOutput())
+                1
+            }
+        )
+    }
+    return this
+}
+
+fun LiteralArgumentBuilder<FabricClientCommandSource?>.reloadCommand(): LiteralArgumentBuilder<FabricClientCommandSource?> {
+    reloadAliases.forEach { s ->
+        this.then(ClientCommandManager.literal(s)
+            .executes { context ->
+                //Checking whether the client is connected to the wynncraft network
+                checkWCNetwork()
+
+                //Reloading core
+                SPHunter.reloadCore()
+                context.source.sendFeedback(TFError("Core reloaded!"))
                 1
             }
         )

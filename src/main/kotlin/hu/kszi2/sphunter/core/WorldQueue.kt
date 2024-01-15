@@ -48,7 +48,7 @@ class WorldQueue : Iterable<WorldEntry> {
         this.sortSelf()
     }
 
-    private fun sortSelf() {
+    fun sortSelf() {
         queue.sortWith { o1, o2 ->
             o1.spTime - o2.spTime
         }

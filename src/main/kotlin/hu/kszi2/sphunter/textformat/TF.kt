@@ -19,13 +19,17 @@ object TF {
         return Text.literal(text).formatted(Formatting.GOLD)
     }
 
+    fun TFWhite(text: String): MutableText {
+        return Text.literal(text).formatted(Formatting.WHITE)
+    }
+
     fun TFRoute(i: Int, worldInstance: WorldEntry): MutableText {
         val numbering = TFInfo("${(i + 1).toString().padStart(2, '0')}. ")
         val worldPrefix = TFComment("[")
         val wc = Text.literal("WC").formatted(Formatting.GRAY)
-        val worldNum = Text.literal(
+        val worldNum = TFWhite(
             worldInstance.worldNum.toString().padStart(2, '0')
-        ).formatted(Formatting.WHITE)
+        )
         val worldSuffix = TFComment("]")
         val dash = Text.literal(" - ")
         val trailing = TFComment("Time left: ")
@@ -39,5 +43,9 @@ object TF {
             .append(dash)
             .append(trailing)
             .append(timeLeft)
+    }
+
+    fun TFError(text: String): MutableText {
+        return Text.literal("[SPHunter]: $text").formatted(Formatting.RED)
     }
 }

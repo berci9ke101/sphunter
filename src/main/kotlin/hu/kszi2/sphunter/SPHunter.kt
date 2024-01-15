@@ -2,6 +2,7 @@ package hu.kszi2.sphunter
 
 import hu.kszi2.sphunter.commands.*
 import hu.kszi2.sphunter.core.WorldQueue
+import hu.kszi2.sphunter.core.routeSplash
 import hu.kszi2.sphunter.networking.sendChatMessage
 import hu.kszi2.sphunter.textformat.TF.TFComment
 import net.fabricmc.api.ModInitializer
@@ -14,16 +15,27 @@ import kotlin.concurrent.thread
 
 
 object SPHunter : ModInitializer {
-    private const val MOD_ID = "sphunter";
+    private const val MOD_ID = "sphunter"
     internal val logger = LoggerFactory.getLogger(MOD_ID)
 
     private var greet = false
     var hunting = false
         private set
+
+    var generating = false
+
     var queue = WorldQueue()
         private set
 
     internal var getServers = false
+
+    internal fun reloadCore() {
+        greet = false
+        hunting = false
+        generating = false
+        queue = WorldQueue()
+        getServers = false
+    }
 
     override fun onInitialize() {
         logger.info("SPHunter: Starting beta build!")
@@ -36,6 +48,9 @@ object SPHunter : ModInitializer {
 
         //Registering hunting
         registerHunting()
+
+        //Initialize routeSplashes
+        routeSplash()
     }
 
     fun toggleHunting() {
@@ -44,6 +59,7 @@ object SPHunter : ModInitializer {
             false -> {
                 queue = WorldQueue()
                 hunting = true
+                generating = false
             }
         }
     }
@@ -89,6 +105,7 @@ object SPHunter : ModInitializer {
                     .aliasesCommand()
                     .huntCommand()
                     .generaterouteCommand()
+                    .reloadCommand()
             )
         })
     }
