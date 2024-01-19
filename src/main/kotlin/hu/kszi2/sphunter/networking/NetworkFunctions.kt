@@ -47,7 +47,7 @@ internal fun getSecondsUntilSoulPoint(): Int {
 
 internal fun getCurrentWorld(): Int {
     val playerList = MinecraftClient.getInstance().networkHandler!!.playerList
-    val regex = Regex("\\[WC(?<id>\\d+)]")
+    val regex = Regex("Global \\[WC(?<id>\\d+)]")
 
     playerList.forEach {
         if (regex.containsMatchIn(it.displayName.toString())) {
@@ -67,7 +67,7 @@ internal fun getCurrentWorldPair(): WorldEntry {
 
 internal fun onWorld(): Boolean {
     MinecraftClient.getInstance().networkHandler!!.playerList.forEach {
-        if (Regex("\\[WC(?<id>\\d+)]").containsMatchIn(it.displayName.toString())) {
+        if (Regex("Global \\[WC(?<id>\\d+)]").containsMatchIn(it.displayName.toString())) {
             return true
         }
     }
